@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI &amp; The New Territory of Tech</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#070B12;--surface:#0D1421;--surface2:#111929;--border:#1A2740;
+  --text:#D4C5A9;--dim:#50627A;--accent:#C8922A;--accent-glow:rgba(200,146,42,0.13);
+  --f-d:'Cormorant Garamond',Georgia,serif;--f-m:'DM Mono','Courier New',monospace
+}
+html,body{background:var(--bg);color:var(--text);font-family:var(--f-m);min-height:100vh;overflow-x:hidden}
+
+/* TOAST */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(12px);
+  background:var(--accent);color:#1a0e00;font-family:var(--f-m);font-size:9px;
+  letter-spacing:.16em;text-transform:uppercase;padding:8px 18px;border-radius:1px;
+  opacity:0;transition:opacity .22s,transform .22s;pointer-events:none;z-index:999}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* HEADER */
+.hdr{padding:32px 40px 28px;position:relative;overflow:hidden;border-bottom:1px solid var(--border)}
+.hdr::before{content:'';position:absolute;top:-80px;right:-50px;width:460px;height:460px;
+  background:radial-gradient(circle,rgba(200,146,42,.07) 0%,transparent 65%);pointer-events:none}
+.hdr-inner{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;position:relative}
+.hdr-text{flex:1;min-width:0}
+.hdr-acts{display:flex;gap:8px;flex-shrink:0;padding-top:4px}
+.act-btn{background:var(--surface2);border:1px solid var(--border);border-radius:2px;color:var(--dim);
+  font-family:var(--f-m);font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;
+  padding:7px 14px;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:5px}
+.act-btn:hover{color:var(--text);border-color:rgba(255,255,255,.14)}
+.act-btn.hi{border-color:rgba(200,146,42,.34);color:var(--accent)}
+.act-btn.hi:hover{background:rgba(200,146,42,.1)}
+.tag{display:inline-flex;align-items:center;gap:7px;font-size:9px;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--accent);border:1px solid rgba(200,146,42,.28);
+  padding:4px 11px;margin-bottom:16px;border-radius:1px}
+.tag::before{content:'';width:5px;height:5px;background:var(--accent);border-radius:50%;flex-shrink:0}
+h1{font-family:var(--f-d);font-size:clamp(26px,4vw,52px);font-weight:300;
+  line-height:1.06;margin-bottom:12px;letter-spacing:-.01em}
+h1 em{font-style:italic;color:var(--accent)}
+.sub{font-size:11px;font-weight:300;color:var(--dim);max-width:580px;line-height:1.9;letter-spacing:.01em}
+
+/* MAP SECTION */
+.map-section{padding:28px 40px 0}
+.map-label{font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);margin-bottom:10px}
+.map-label b{color:var(--accent)}
+.map-grid{display:grid;grid-template-columns:1fr 272px;gap:12px;align-items:start}
+.svgw{background:var(--surface);border:1px solid var(--border);border-radius:2px;overflow:hidden;position:relative}
+.svgw svg{display:block;width:100%}
+.map-hint{position:absolute;bottom:10px;left:12px;font-size:7.5px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--dim);pointer-events:none}
+
+/* TINFO PANEL */
+.tinfo{background:var(--surface);border:1px solid var(--border);border-radius:2px;
+  padding:18px;min-height:420px;overflow-y:auto;position:sticky;top:20px}
+.tinfo .hint{font-size:9.5px;color:var(--dim);font-style:italic;line-height:1.8;padding-top:4px}
+.tinfo .ttag{font-size:7.5px;letter-spacing:.2em;text-transform:uppercase;display:block;margin-bottom:9px}
+.tinfo h3{font-family:var(--f-d);font-size:22px;font-weight:300;margin-bottom:8px}
+.tinfo .tdesc{font-size:10px;font-weight:300;color:var(--dim);line-height:1.88}
+.tbar{width:28px;height:3px;border-radius:1px;margin-bottom:12px}
+.tstats{margin-top:14px;border-top:1px solid var(--border)}
+.sr{display:flex;justify-content:space-between;gap:6px;font-size:9px;padding:7px 0;border-bottom:1px solid var(--border)}
+.sr:last-child{border-bottom:none}
+.sl{color:var(--dim);flex-shrink:0}.sv{color:var(--text);text-align:right;max-width:148px;line-height:1.38}
+
+/* CHAIN LEGEND */
+.chain-legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:12px;padding:12px 0;border-top:1px solid var(--border)}
+.cl-item{display:flex;align-items:center;gap:6px;font-size:8.5px;color:var(--dim);letter-spacing:.05em}
+.cl-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* DIVIDER */
+.divider{height:1px;background:var(--border);margin:40px 40px 0}
+
+/* ARTICLE */
+.art-outer{padding:0 40px 80px}
+.art-wrap{max-width:700px;margin:0 auto;padding:48px 0 0}
+.art-tag{font-size:8.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);display:block;margin-bottom:22px}
+.art-h1{font-family:var(--f-d);font-size:clamp(32px,4.5vw,54px);font-weight:300;line-height:1.05;
+  margin-bottom:10px;letter-spacing:-.01em}
+.art-h1 em{font-style:italic;color:var(--accent)}
+.art-lead{font-family:var(--f-d);font-size:16px;font-weight:300;color:var(--text);
+  line-height:1.9;margin-bottom:34px;padding-bottom:28px;border-bottom:1px solid var(--border)}
+.art-h2{font-family:var(--f-m);font-size:8px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--accent);margin:36px 0 13px;padding-top:6px;border-top:1px solid var(--border)}
+.art-p{font-family:var(--f-d);font-size:16.5px;font-weight:300;color:var(--text);
+  line-height:1.88;margin-bottom:18px;letter-spacing:.003em}
+.art-pull{font-family:var(--f-d);font-size:clamp(17px,2vw,21px);font-style:italic;font-weight:300;
+  color:var(--accent);line-height:1.44;margin:30px 0;padding:18px 24px;
+  border-left:3px solid var(--accent);background:rgba(200,146,42,.05)}
+.art-footer{font-size:9.5px;color:var(--dim);font-style:italic;margin-top:48px;
+  padding-top:18px;border-top:1px solid var(--border);letter-spacing:.04em}
+
+/* SVG CHAIN ANIMATIONS */
+@keyframes travel{to{stroke-dashoffset:-40}}
+@keyframes nodepulse{0%,100%{r:4;opacity:.9}50%{r:6.5;opacity:.5}}
+@keyframes ringpulse{0%{r:5;opacity:.6;stroke-width:1.5}100%{r:14;opacity:0;stroke-width:.5}}
+@keyframes blobpulse{0%,100%{opacity:.60}50%{opacity:.80}}
+.ch-line{animation:travel 1.4s linear infinite}
+.ch-node{animation:nodepulse 2s ease-in-out infinite}
+.ch-ring{animation:ringpulse 2s ease-out infinite}
+.blob-fill{animation:blobpulse 3.5s ease-in-out infinite}
+
+@media(max-width:720px){
+  .hdr,.map-section,.art-outer,.divider{padding-left:18px;padding-right:18px}
+  .map-grid{grid-template-columns:1fr}
+  .hdr-inner{flex-direction:column}
+  .hdr-acts{width:100%}
+}
+</style>
+</head>
+<body>
+<div id="toast" class="toast"></div>
+
+<header class="hdr">
+  <div class="hdr-inner">
+    <div class="hdr-text">
+      <div class="tag">Thought Leadership &middot; Market Structure &middot; 2025</div>
+      <h1>How <em>Artificial Intelligence</em><br>Is Redrawing the Map of Tech</h1>
+      <p class="sub">For two decades, a handful of giants carved territories and left the white spaces between them unclaimed by design. AI is changing who can build, who can scale, and what the map looks like when everyone can.</p>
+    </div>
+    <div class="hdr-acts">
+      <button class="act-btn hi" onclick="doShare()">&#8599; Share</button>
+      <button class="act-btn" onclick="doExport()">&#8595; Export</button>
+    </div>
+  </div>
+</header>
+
+<div class="map-section">
+  <div class="map-label"><b>Territory Map</b> &mdash; hover any territory to explore position &amp; AI response posture</div>
+  <div class="map-grid">
+    <div class="svgw">
+      <svg id="trsvg" viewBox="0 0 900 500" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id="pgrid" width="28" height="28" patternUnits="userSpaceOnUse">
+            <path d="M28 0L0 0 0 28" fill="none" stroke="rgba(255,255,255,.025)" stroke-width=".5"/>
+          </pattern>
+          <radialGradient id="rg1" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="rgba(200,146,42,.055)"/>
+            <stop offset="100%" stop-color="rgba(200,146,42,0)"/>
+          </radialGradient>
+          <filter id="fblur" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="14"/>
+          </filter>
+          <filter id="fsoft" x="-80%" y="-80%" width="260%" height="260%">
+            <feGaussianBlur stdDeviation="5" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+        <rect width="900" height="500" fill="#070B12"/>
+        <rect width="900" height="500" fill="url(#pgrid)"/>
+        <rect width="900" height="500" fill="url(#rg1)"/>
+      </svg>
+      <div class="map-hint">Chains weave through the white spaces the giants cannot hold</div>
+    </div>
+    <div class="tinfo" id="tinfo">
+      <p class="hint">Hover any territory on the map to explore each player&rsquo;s position, moat, and AI response posture. The glowing chains threading through white space are where the next competitive battles are being built.</p>
+    </div>
+  </div>
+
+  <div class="chain-legend" id="chain-legend"></div>
+</div>
+
+<div class="divider"></div>
+
+<div class="art-outer">
+  <div class="art-wrap">
+    <span class="art-tag">Thought Leadership &middot; Market Structure &middot; 2025</span>
+    <h2 class="art-h1">The map is wrong.<br><em>And the horse has been dead longer than you think.</em></h2>
+
+    <p class="art-lead">There is an old piece of wisdom that goes something like this: when you discover you are riding a dead horse, the best strategy is to dismount. Simple enough. Except that organisations have developed an impressive catalogue of alternatives they prefer to try first.</p>
+
+    <p class="art-p">Change the rider. Appoint a committee to study the horse. Commission a report on advanced equine revival techniques. Benchmark how other organisations are riding their dead horses. Hire an external consultant to validate that the horse is, in fact, dead, then form a working group to assess the implications. And if all else fails, declare that the current horse is the strategic standard and update the policy to reflect best practices in dead horse management.</p>
+
+    <p class="art-p">Anyone who has sat in a large enterprise boardroom in the last two years will recognise the pattern. The horse, in this case, is the assumption that enterprise technology strategy still works the way it did in 2019. The saddle being endlessly adjusted is the AI governance framework. The territory being quietly occupied while the committee meets is the one your organisation assumed was safely yours.</p>
+
+    <p class="art-p">For the last two decades, technology strategy in the boardroom came down to a single question: which giant do we partner with, and which ones do we have to live with? Google owned search and attention. Microsoft owned the enterprise desktop. SAP and Oracle owned the back office. Meta owned social. IBM owned the regulated industry relationship. These were not just companies. They were the walls of the room you were building inside. Strategy meant navigating their territory, not questioning it.</p>
+
+    <p class="art-p">That room no longer has the same walls.</p>
+
+    <p class="art-h2">What the giants actually built was not a product. It was a lock.</p>
+
+    <p class="art-p">Spend a moment with the honest version of the last twenty years of enterprise technology. These companies did not win because they built the best software. They won because they made switching expensive enough that the question of whether their software was actually good became largely irrelevant. Your organisation signs multi-year contracts, runs implementations that take eighteen months and cost three times the original estimate, then tolerates performance that would get any internal team fired. Why? Because the alternative is more pain than anyone wants to authorise. That is not a vendor relationship. That is a hostage situation with better catering.</p>
+
+    <p class="art-p">The scale advantages they accumulated were not incidental to their success. Data, distribution, developer ecosystems, switching costs: these were the strategy. The goal was never just to build a better product. It was to make the space around the product so expensive to replicate that no one would try.</p>
+
+    <p class="art-p">It worked. For years, the white spaces between the giants sat largely empty. The industry-specific problems, the workflow gaps, the underserved middle market: not because the problems were unsolvable, but because solving them required engineering depth, infrastructure investment, and go-to-market muscle that only the giants could afford. Everyone else was a vertical SaaS company hoping to get acquired.</p>
+
+    <p class="art-p">You were not protected by your vendor relationships. You were trapped by them. The distinction matters now more than it ever has.</p>
+
+    <div class="art-pull">The dead horse is not AI. It is the belief that the barriers which once protected your competitive position are still standing.</div>
+
+    <p class="art-h2">AI did not just create new products. It repriced the cost of building.</p>
+
+    <p class="art-p">This is where most board-level conversations about AI go wrong. They treat it as a capability question: what can AI do, and how do we use it inside our existing systems? That framing misses the structural shift entirely. The more consequential question is about economics.</p>
+
+    <p class="art-p">What AI has done is collapse the cost of building software by an order of magnitude. The engineering depth, the infrastructure investment, the go-to-market resources: these were the barriers that kept the white spaces empty. Not talent. Not ideas. Cost. Those barriers are gone.</p>
+
+    <p class="art-p">A five-person team can now build, deploy, and iterate on software that required a fifty-person engineering organisation three years ago. A domain expert who spent twenty years understanding exactly how your industry&rsquo;s operational failures work can now build a solution to those failures without writing a single line of code. The constraint that protected the giants and locked out everyone else is dissolving in real time.</p>
+
+    <p class="art-p">What this means is not that AI will help your existing vendors serve you better. It means the economic logic that made those vendors the only viable option has collapsed. The white spaces your sector has lived with for two decades are about to fill, whether you participate in filling them or not. Your competitors are doing the math. Some of them have already started.</p>
+
+    <p class="art-h2">The giants are not retreating. But expansion is not the same as capture.</p>
+
+    <p class="art-p">Let us be direct: Google, Microsoft, Meta and their peers are not going to disappear. Some will remain dominant. Some will be displaced by AI-native successors, companies like OpenAI and Anthropic that built from the foundation model up rather than retrofitting AI onto legacy product lines. The map is not being erased. It is being redrawn.</p>
+
+    <p class="art-p">Copilot, Gemini, and their successors are not product features. They are land grabs. The incumbents are using AI to move into markets they could never justify entering at the unit economics of three years ago. They are casting a wider shadow across the white spaces, and they are doing it fast.</p>
+
+    <p class="art-p">But a shadow is not a solution. What the giants are building is general, designed for everyone, which means it is optimised for no one in particular. It does not know that your compliance cycle has a seven-week lag that breaks every standard workflow tool. It does not know how your procurement team actually identifies a high-risk supplier, because that knowledge lives in the heads of three people who have been doing it for a decade and have never written it down. The shadow is wider. The gaps underneath it remain.</p>
+
+    <p class="art-p">The dangerous illusion is that because Microsoft or Google now has an AI layer, the white spaces are being addressed. They are not. Those gaps are now visible to every small, fast, AI-native team looking for exactly that kind of specific, underserved, high-value problem to own. You have been given a window. It is closing. Most boards are spending it updating their AI usage policy.</p>
+
+    <p class="art-h2">The company that takes your market will not look like a company. It will look like a chain.</p>
+
+    <p class="art-p">Forget the narrative of the AI startup that becomes a unicorn and disrupts the incumbent. That is the last cycle&rsquo;s story. The new competitive threat does not announce itself. It does not raise a large Series A and launch with a press release. That is also probably not how you lose.</p>
+
+    <p class="art-p">The more dangerous scenario is quieter, slower, and nearly invisible until it is too late to reverse. It is a connected sequence of small, precise, high-value interventions, a chain, that individually look like nothing worth escalating and collectively hollow out the operational value you thought was safely locked in your enterprise stack.</p>
+
+    <p class="art-p">An AI-assisted contract analyser that a mid-level manager adopted because it saved her four hours a week. A supplier risk monitor the procurement lead installed because the existing system never gave him what he actually needed. A workflow automation that two people in operations quietly built around the reconciliation process because the licensed tool was too slow to configure properly. None of these appear on a competitive radar. None of them get briefed to the board.</p>
+
+    <p class="art-p">And then, one day, the question of whether to renew the enterprise contract becomes surprisingly complicated. The contract covers capabilities the organisation has already replaced, piece by piece, with tools that cost less, move faster, and were built by people who actually understood the problem. The switching cost that was once your moat has transferred. Quietly. Incrementally. Without a press release.</p>
+
+    <div class="art-pull">The chain is probably already forming somewhere in your organisation. Are you the one building it, or the one being built around?</div>
+
+    <p class="art-p">The new competitive unit is not the platform and not the point solution. It is the chain. A company building a chain, say an AI-assisted procurement tool that connects to a contract risk analyser that feeds a supplier relationship dashboard, is not trying to be SAP. It is building something SAP cannot build without breaking the architecture it has spent thirty years perfecting. The chain is the advantage precisely because it is specific, interconnected, and deeply embedded in the operational reality of a particular customer.</p>
+
+    <p class="art-p">The companies that will matter in five years are not the ones raising the most capital to build the most ambitious platform. They are the ones asking the most precise questions about where the friction actually lives, and building the shortest possible path to eliminating it. Most of those companies do not exist yet. Some will be built by your competitors. Some will be built by people who currently work for you.</p>
+
+    <p class="art-h2">What boards need to decide, and most are deferring.</p>
+
+    <p class="art-p">There is a pattern visible in almost every large enterprise right now. The AI task force reports to the CTO. The CTO reports to the CEO. The CEO gives the board a quarterly update framed around responsible deployment and risk mitigation. The board nods, asks about data privacy, and moves to the next agenda item.</p>
+
+    <p class="art-p">The uncomfortable truth is that enterprise AI strategy at the board level is still largely about risk mitigation: governance frameworks, data policy, responsible use guidelines. These matter. They are not sufficient. A well-written policy for riding the horse does not change the underlying condition of the horse.</p>
+
+    <p class="art-p">The strategic questions that should be on the agenda are different. Where are the white spaces in your sector that AI will make economically viable to attack in the next eighteen to twenty-four months? Who in your competitive landscape has the domain knowledge, the cost structure, and the appetite to build there before you do? And if a chain of AI-native solutions begins replacing the workflow value you currently derive from your enterprise software contracts, because it is faster, cheaper, and better calibrated to your actual operations, what is the plan?</p>
+
+    <p class="art-p">These are not technology questions. They are competitive positioning questions. They belong in the boardroom, not the IT function. If those questions do not have owners in your boardroom, you do not have an AI strategy. You have a risk register and a prayer.</p>
+
+    <p class="art-p">The territory is being redrawn. Some of it is being claimed by the expanding giants. Some of it is being built into chains by teams your strategy has not yet registered as relevant. The window to move from observer to participant is open. The best time to dismount was probably eighteen months ago. The second best time is before the next board meeting.</p>
+
+    <p class="art-footer">This article is part of an ongoing series on AI, market structure, and what the next decade of enterprise competition looks like for leadership teams willing to ask the uncomfortable questions.</p>
+  </div>
+</div>
+
+<script>
+// RNG
+function mkRand(seed){
+  var s=seed%2147483647;if(s<=0)s+=2147483646;
+  return function(){s=s*16807%2147483647;return(s-1)/2147483646};
+}
+// Blob path
+function blobPts(cx,cy,rx,ry,seed){
+  var rand=mkRand(seed),pts=[],n=11;
+  for(var i=0;i<n;i++){
+    var a=(i/n)*Math.PI*2-Math.PI/2,j=1+(rand()-0.5)*0.38;
+    pts.push({x:cx+rx*j*Math.cos(a),y:cy+ry*j*Math.sin(a)});
+  }
+  return pts;
+}
+function svgBlobD(cx,cy,rx,ry,seed){
+  var pts=blobPts(cx,cy,rx,ry,seed),n=pts.length;
+  var d='M'+pts[0].x.toFixed(1)+' '+pts[0].y.toFixed(1);
+  for(var i=0;i<n;i++){
+    var p=pts[(i-1+n)%n],c=pts[i],nx=pts[(i+1)%n],nx2=pts[(i+2)%n];
+    d+=' C'+(c.x+(nx.x-p.x)/6).toFixed(1)+' '+(c.y+(nx.y-p.y)/6).toFixed(1)+' '+
+        (nx.x-(nx2.x-c.x)/6).toFixed(1)+' '+(nx.y-(nx2.y-c.y)/6).toFixed(1)+' '+
+        nx.x.toFixed(1)+' '+nx.y.toFixed(1);
+  }
+  return d+'Z';
+}
+// Path length helper
+function polyLen(nodes){
+  var l=0;
+  for(var i=1;i<nodes.length;i++){
+    var dx=nodes[i].x-nodes[i-1].x,dy=nodes[i].y-nodes[i-1].y;
+    l+=Math.sqrt(dx*dx+dy*dy);
+  }
+  return l;
+}
+
+// DATA
+var BW=900,BH=500;
+var GIANTS=[
+  {id:'google',     lb:'Google',     x:390,y:130,rx:132,ry:108,seed:101,color:'#1A6BAA'},
+  {id:'microsoft',  lb:'Microsoft',  x:642,y:124,rx:118,ry:97, seed:303,color:'#0D7A5F'},
+  {id:'amazon',     lb:'Amazon',     x:510,y:248,rx:124,ry:102,seed:919,color:'#C45200'},
+  {id:'meta',       lb:'Meta',       x:140,y:272,rx:114,ry:95, seed:202,color:'#7B30C8'},
+  {id:'apple',      lb:'Apple',      x:244,y:134,rx:96, ry:80, seed:111,color:'#3A7A4A'},
+  {id:'nvidia',     lb:'Nvidia',     x:776,y:206,rx:84, ry:70, seed:777,color:'#1E7E3E'},
+  {id:'salesforce', lb:'Salesforce', x:330,y:368,rx:88, ry:73, seed:656,color:'#0070D2'},
+  {id:'sap',        lb:'SAP',        x:668,y:350,rx:82, ry:68, seed:505,color:'#0E5C8A'},
+  {id:'oracle',     lb:'Oracle',     x:156,y:398,rx:78, ry:65, seed:404,color:'#7C3B00'},
+  {id:'ibm',        lb:'IBM',        x:76, y:138,rx:62, ry:52, seed:808,color:'#9B1C1C'}
+];
+var AI_TITANS=[
+  {id:'openai',    lb:'OpenAI',    x:362,y:274,rx:106,ry:89,seed:707,color:'#0EA47C'},
+  {id:'anthropic', lb:'Anthropic', x:540,y:308,rx:90, ry:74,seed:818,color:'#D95F02'}
+];
+// Chains: thread deliberately through white spaces between blobs
+var CHAINS=[
+  {id:'ch1',lbl:'Vertical SaaS',
+   nodes:[{x:480,y:58},{x:512,y:74},{x:546,y:58},{x:580,y:74},{x:614,y:58},{x:648,y:74}],
+   color:'#A78BFA',delay:0},
+  {id:'ch2',lbl:'Industry Intelligence',
+   nodes:[{x:50,y:198},{x:80,y:214},{x:110,y:198},{x:140,y:214},{x:170,y:198},{x:200,y:214},{x:228,y:198}],
+   color:'#06B6D4',delay:0.4},
+  {id:'ch3',lbl:'AI-Native Workflow',
+   nodes:[{x:400,y:182},{x:428,y:198},{x:458,y:182},{x:486,y:198},{x:514,y:182}],
+   color:'#F472B6',delay:0.7},
+  {id:'ch4',lbl:'Domain Models',
+   nodes:[{x:224,y:450},{x:256,y:464},{x:290,y:450},{x:324,y:464},{x:358,y:450},{x:392,y:464}],
+   color:'#F59E0B',delay:1.0},
+  {id:'ch5',lbl:'RegTech & Compliance',
+   nodes:[{x:636,y:268},{x:664,y:284},{x:694,y:268},{x:724,y:284},{x:754,y:268},{x:782,y:284}],
+   color:'#34D399',delay:1.3}
+];
+
+var TDATA={
+  google:{lb:'Google',type:'Established Giant',color:'#1A6BAA',
+    desc:'Dominated search, digital advertising, and cloud for two decades. Network effects and data moats made the position seemingly impenetrable until AI began reshaping the search paradigm itself. Now pivoting aggressively with Gemini across all product surfaces.',
+    stats:[{l:'Core Moat',v:'Search index & ad auctions'},{l:'AI Response',v:'Gemini, aggressive and broad'},{l:'Territory Cast',v:'Very large via Cloud & APIs'}]},
+  microsoft:{lb:'Microsoft',type:'Established Giant',color:'#0D7A5F',
+    desc:'The most successful AI pivot of any incumbent. Copilot embedded across Office, GitHub, and Azure positions Microsoft to expand into enterprise workflows previously too fragmented to own. The OpenAI partnership was a defining strategic bet.',
+    stats:[{l:'Core Moat',v:'Enterprise productivity suite'},{l:'AI Response',v:'OpenAI partnership, boldest pivot'},{l:'Territory Cast',v:'Largest among incumbents'}]},
+  amazon:{lb:'Amazon',type:'Established Giant',color:'#C45200',
+    desc:'AWS commands over a third of global cloud infrastructure. Bedrock and its managed AI service layer positions Amazon as the default deployment platform for enterprise AI, infrastructure-first rather than product-first.',
+    stats:[{l:'Core Moat',v:'Cloud infrastructure & logistics'},{l:'AI Response',v:'Bedrock, platform play'},{l:'Territory Cast',v:'Very large, AI infrastructure layer'}]},
+  meta:{lb:'Meta',type:'Established Giant',color:'#7B30C8',
+    desc:'Built on social graphs and the attention economy. AI is both a threat and a weapon. Meta is betting on open-source AI via Llama to avoid becoming a walled garden and to establish itself as the infrastructure others build upon.',
+    stats:[{l:'Core Moat',v:'Social graph & identity'},{l:'AI Response',v:'Llama open-source strategy'},{l:'Territory Cast',v:'Moderate via AI infrastructure'}]},
+  apple:{lb:'Apple',type:'Established Giant',color:'#3A7A4A',
+    desc:'Device ecosystem and privacy positioning create a unique AI moat. Apple Intelligence runs on-device, making privacy the competitive differentiator. Over two billion active devices is a distribution advantage no competitor can match.',
+    stats:[{l:'Core Moat',v:'Device ecosystem & distribution'},{l:'AI Response',v:'Apple Intelligence, on-device'},{l:'Territory Cast',v:'Large, consumer AI differentiation'}]},
+  nvidia:{lb:'Nvidia',type:'Established Giant',color:'#1E7E3E',
+    desc:'The unexpected king of the AI era. GPU dominance created a chokepoint in the entire AI supply chain. Every foundation model, every AI startup, every cloud provider runs on Nvidia infrastructure. The moat is not software. It is silicon.',
+    stats:[{l:'Core Moat',v:'GPU architecture & CUDA ecosystem'},{l:'AI Response',v:'The infrastructure everyone runs on'},{l:'Territory Cast',v:'Foundational, beneath all AI activity'}]},
+  salesforce:{lb:'Salesforce',type:'Established Giant',color:'#0070D2',
+    desc:'CRM market dominance creates a vast data moat across customer relationships. Einstein AI is deeply embedded in core workflows. The risk is that AI-native CRM challengers can now be built faster and cheaper than the switching cost Salesforce relies on.',
+    stats:[{l:'Core Moat',v:'CRM data & workflow integration'},{l:'AI Response',v:'Einstein AI, embedded and broad'},{l:'Territory Cast',v:'Moderate, defending not expanding'}]},
+  sap:{lb:'SAP',type:'Established Giant',color:'#0E5C8A',
+    desc:'ERP integration is extraordinarily sticky, territory defended by switching costs, not innovation velocity. Joule adds intelligence to existing workflows. Unlikely to expand into new ground; more likely to deepen the moat already held.',
+    stats:[{l:'Core Moat',v:'ERP integration depth'},{l:'AI Response',v:'Joule, embedded and cautious'},{l:'Territory Cast',v:'Minimal, protected by stickiness'}]},
+  oracle:{lb:'Oracle',type:'Established Giant',color:'#7C3B00',
+    desc:'Database and cloud infrastructure at enterprise scale. Positioning as the data layer beneath AI workloads. OCI is gaining traction as an alternative compute platform, particularly for regulated industries with data residency requirements.',
+    stats:[{l:'Core Moat',v:'Database & cloud infrastructure'},{l:'AI Response',v:'OCI AI, infrastructure focus'},{l:'Territory Cast',v:'Moderate, data layer positioning'}]},
+  ibm:{lb:'IBM',type:'Established Giant',color:'#9B1C1C',
+    desc:'Deep in regulated industries and legacy infrastructure. AI adoption through watsonx is calibrated, focused on enterprise compliance, not consumer surface area. Shrinking territory in the AI era as nimbler challengers address its core verticals.',
+    stats:[{l:'Core Moat',v:'Enterprise consulting & legacy'},{l:'AI Response',v:'watsonx, targeted and slower'},{l:'Territory Cast',v:'Small, constrained by legacy posture'}]},
+  openai:{lb:'OpenAI',type:'AI Titan',color:'#0EA47C',
+    desc:'The catalyst that changed everything. Foundation models, the ChatGPT platform, and API-first distribution created an entirely new layer of the technology stack, casting a shadow over white spaces incumbents had left untouched for a decade.',
+    stats:[{l:'Core Strength',v:'Foundation model leadership'},{l:'Strategy',v:'Platform + API ecosystem'},{l:'Territory Impact',v:'Enormous, reshaping all sectors'}]},
+  anthropic:{lb:'Anthropic',type:'AI Titan',color:'#D95F02',
+    desc:'Safety-first AI development from a team that prioritised alignment above scale. Claude is positioned as the trust layer for enterprise AI, the model of choice when the cost of getting it wrong is existential for regulated, high-stakes businesses.',
+    stats:[{l:'Core Strength',v:'Constitutional AI & safety'},{l:'Strategy',v:'Enterprise trust + API'},{l:'Territory Impact',v:'Large, high-stakes sectors'}]}
+};
+
+function showTInfo(data,color){
+  var el=document.getElementById('tinfo');
+  var sh=data.stats.map(function(s){
+    return '<div class="sr"><span class="sl">'+s.l+'</span><span class="sv">'+s.v+'</span></div>';
+  }).join('');
+  el.innerHTML='<div class="tbar" style="background:'+color+'"></div>'+
+    '<span class="ttag" style="color:'+color+'">'+data.type+'</span>'+
+    '<h3 style="color:'+color+'">'+data.lb+'</h3>'+
+    '<p class="tdesc">'+data.desc+'</p>'+
+    '<div class="tstats">'+sh+'</div>';
+}
+
+function buildSVG(){
+  var svg=document.getElementById('trsvg');
+  var NS='http://www.w3.org/2000/svg';
+  function el(tag,attrs){
+    var e=document.createElementNS(NS,tag);
+    for(var k in attrs) e.setAttribute(k,attrs[k]);
+    return e;
+  }
+
+  // Particles in white space
+  var rand=mkRand(4242);
+  var PCOLS=['#C8922A','#A78BFA','#06B6D4','#F59E0B','#34D399','#F472B6'];
+  var allEnts=GIANTS.map(function(g){return{x:g.x,y:g.y,rx:g.rx*0.9,ry:g.ry*0.9};})
+    .concat(AI_TITANS.map(function(a){return{x:a.x,y:a.y,rx:a.rx*1.2,ry:a.ry*1.2};}));
+  var pg=el('g',{});
+  var cnt=0,att=0;
+  while(cnt<52&&att<800){
+    att++;
+    var px=10+rand()*(BW-20),py=10+rand()*(BH-20),inside=false;
+    for(var k=0;k<allEnts.length;k++){
+      var dx=(px-allEnts[k].x)/allEnts[k].rx,dy=(py-allEnts[k].y)/allEnts[k].ry;
+      if(dx*dx+dy*dy<1.1){inside=true;break;}
+    }
+    if(!inside){
+      var ci=el('circle',{cx:px.toFixed(1),cy:py.toFixed(1),r:(1.2+rand()*2.2).toFixed(1),
+        fill:PCOLS[Math.floor(rand()*PCOLS.length)],opacity:(0.22+rand()*0.38).toFixed(2)});
+      pg.appendChild(ci);cnt++;
+    }
+  }
+  svg.appendChild(pg);
+
+  // ── CHAINS (drawn first so blobs render on top) ───────────────────────────
+  var chainG=el('g',{});
+  var legendEl=document.getElementById('chain-legend');
+
+  for(var ci=0;ci<CHAINS.length;ci++){
+    var ch=CHAINS[ci];
+    var ns=ch.nodes;
+    // Build path d
+    var ld='M'+ns[0].x.toFixed(1)+' '+ns[0].y.toFixed(1);
+    for(var ni=1;ni<ns.length;ni++) ld+=' L'+ns[ni].x.toFixed(1)+' '+ns[ni].y.toFixed(1);
+    var plen=Math.ceil(polyLen(ns));
+    var segLen=20; // visible dash segment
+
+    // Base track line (dim)
+    var track=el('path',{d:ld,fill:'none',stroke:ch.color,'stroke-width':'1.5',
+      'stroke-dasharray':'4 5',opacity:'.25'});
+    chainG.appendChild(track);
+
+    // Animated signal pulse traveling along chain
+    var pulse=el('path',{d:ld,fill:'none',stroke:ch.color,'stroke-width':'2.5',
+      'stroke-dasharray':segLen+' '+(plen-segLen),
+      'stroke-dashoffset':'0',opacity:'.92','stroke-linecap':'round'});
+    pulse.setAttribute('class','ch-line');
+    pulse.style.animationDuration=(1.2+ci*0.18)+'s';
+    pulse.style.animationDelay='-'+ch.delay+'s';
+    // Total travel = plen
+    var styleEl=document.createElement('style');
+    styleEl.textContent='#pulse'+ci+'{animation:none}@keyframes travel'+ci+
+      '{to{stroke-dashoffset:-'+plen+'}}#pulse'+ci+
+      '{animation:travel'+ci+' '+(1.8+ci*0.22)+'s linear infinite;animation-delay:-'+ch.delay+'s}';
+    document.head.appendChild(styleEl);
+    pulse.id='pulse'+ci;
+    pulse.style.animation='none'; // reset, will use keyframe above
+    chainG.appendChild(pulse);
+
+    // Nodes with rings
+    for(var ni2=0;ni2<ns.length;ni2++){
+      var nx2=ns[ni2].x,ny2=ns[ni2].y;
+      // Outer ring
+      var ring=el('circle',{cx:nx2.toFixed(1),cy:ny2.toFixed(1),r:'4',fill:'none',
+        stroke:ch.color,'stroke-width':'1.5',opacity:'0'});
+      ring.setAttribute('class','ch-ring');
+      ring.style.animationDelay=(ni2*0.22+ch.delay*0.5)+'s';
+      chainG.appendChild(ring);
+      // Core node
+      var nd=el('circle',{cx:nx2.toFixed(1),cy:ny2.toFixed(1),r:'3.5',
+        fill:ch.color,opacity:'.9'});
+      nd.setAttribute('class','ch-node');
+      nd.style.animationDelay=(ni2*0.22+ch.delay*0.5)+'s';
+      // Glow behind node
+      var glow=el('circle',{cx:nx2.toFixed(1),cy:ny2.toFixed(1),r:'7',
+        fill:ch.color,opacity:'.18',filter:'url(#fblur)'});
+      chainG.appendChild(glow);
+      chainG.appendChild(nd);
+    }
+
+    // Chain label above first node
+    var lx=ns[0].x,ly=ns[0].y-14;
+    var lb=el('text',{x:lx.toFixed(1),y:ly.toFixed(1),'text-anchor':'middle',
+      'font-family':"'DM Mono',monospace",'font-size':'8','fill':ch.color,
+      opacity:'.75','letter-spacing':'0.08em'});
+    lb.textContent=ch.lbl;
+    chainG.appendChild(lb);
+
+    // Legend item
+    var li=document.createElement('div');
+    li.className='cl-item';
+    li.innerHTML='<div class="cl-dot" style="background:'+ch.color+'"></div>'+ch.lbl;
+    legendEl.appendChild(li);
+  }
+  svg.appendChild(chainG);
+
+  // ── BLOBS (on top of chains) ──────────────────────────────────────────────
+  var allData=GIANTS.concat(AI_TITANS);
+  var blobG=el('g',{});
+  for(var ei=0;ei<allData.length;ei++){
+    var e=allData[ei];
+    var td=TDATA[e.id];
+    var d=svgBlobD(e.x,e.y,e.rx,e.ry,e.seed);
+
+    var glow2=el('path',{d:d,fill:e.color,opacity:'.14',filter:'url(#fblur)'});
+    blobG.appendChild(glow2);
+
+    var mp=el('path',{d:d,fill:e.color,opacity:'.62',
+      stroke:'rgba(255,255,255,.14)','stroke-width':'1'});
+    mp.setAttribute('class','blob-fill');
+    mp.style.animationDelay=(ei*0.31)+'s';
+    mp.style.cursor='pointer';
+    (function(mpath,tdat,ec){
+      mpath.addEventListener('mouseenter',function(){
+        mpath.style.animation='none';mpath.setAttribute('opacity','.88');
+        showTInfo(tdat,ec);
+      });
+      mpath.addEventListener('mouseleave',function(){
+        mpath.style.animation='';mpath.setAttribute('opacity','.62');
+      });
+    })(mp,td,e.color);
+    blobG.appendChild(mp);
+
+    var tx=el('text',{x:e.x.toFixed(1),y:e.y.toFixed(1),'text-anchor':'middle',
+      'dominant-baseline':'middle','font-family':"'DM Mono',monospace",
+      'font-size':'10.5','fill':'rgba(255,255,255,.9)','filter':'url(#fsoft)',
+      'pointer-events':'none'});
+    tx.textContent=e.lb;
+    blobG.appendChild(tx);
+  }
+  svg.appendChild(blobG);
+}
+
+// Share / Export
+function showToast(msg){
+  var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show');},2200);
+}
+function doShare(){
+  var url=window.location.href;
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url).then(function(){showToast('Link copied to clipboard');});
+  } else {
+    showToast('Copy link from address bar');
+  }
+}
+function doExport(){
+  var html='<!DOCTYPE html>\n'+document.documentElement.outerHTML;
+  var blob=new Blob([html],{type:'text/html;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');a.href=url;a.download='ai-territory-map.html';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  setTimeout(function(){URL.revokeObjectURL(url);},1000);
+  showToast('Downloading\u2026');
+}
+
+buildSVG();
+</script>
+</body>
+</html>
